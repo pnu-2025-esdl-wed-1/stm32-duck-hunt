@@ -1,14 +1,14 @@
-# 텀 프로젝트 주제 제안
+# 프로젝트 주제 제안
 
 ## 1. 지능형 스마트 화분 시스템
 
 - 예시
 
-![smart_plantpot.jpg](./smart_plantpot.jpg)
+![smart_plantpot.jpg](../img/smart_plantpot.jpg)
 
 - Arduino 구현 예시
 
-![arduino_smart_plantpot.gif](./arduino_smart_plantpot.gif)
+![arduino_smart_plantpot.gif](../img/arduino_smart_plantpot.gif)
 
 
 ### 목적
@@ -85,11 +85,11 @@ STM32F107 마이크로컨트롤러를 중심으로, 환경 센서(온습도, 조
 
 - 원본 게임
 
-![duck_hunt.jpg](./duck_hunt.jpg)
+![duck_hunt.jpg](../img/duck_hunt.jpg)
 
 - Arduino 광총 구현 예시
 
-![arduino_zapper.jpg](./arduino_zapper.jpg)
+![arduino_zapper.jpg](../img/arduino_zapper.jpg)
 
 
 ### 목적
@@ -175,3 +175,8 @@ STM32F107 마이크로컨트롤러를 중심으로 TFT LCD(또는 컴퓨터 모�
        화면에 MISS 표시, LED / 부저 효과
 
 7. Bluetooth로 결과 전송
+
+
+---
+
+*본 문서에 사용된 이미지는 라이선스 생각 안하고 그냥 뽀려 온 것임*
