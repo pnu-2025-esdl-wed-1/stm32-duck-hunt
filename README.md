@@ -9,4 +9,4 @@
 
 - [프로젝트 주제 제안](./doc/1-project_proposal.md)
 
-- [프로젝트 구체화 및 역할 분배](./doc/2-project_specification_and_task_allocation.md)
+- [프로젝트 구체화](./doc/2-project_specification.md)
