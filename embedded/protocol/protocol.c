@@ -3,14 +3,14 @@
 
 volatile uint32_t seq = 0;
 
-char *Protocol_BuildTriggerMessage(uint32_t seq, uint32_t ambient, float distance)
+char *Protocol_BuildTriggerMessage(uint32_t seq, uint32_t ambient)
 {
     static char buffer[64];
 
     // 메시지 타입, seq, ambient, distance
     snprintf(buffer, sizeof(buffer),
-             "TYPE=%u;SEQ=%lu;AMB=%lu;DIST=%.2f\n",
-             TYPE_TRIGGER, seq, ambient, distance);
+             "TYPE=%u;SEQ=%lu;AMB=%lu",
+             TYPE_TRIGGER, seq, ambient);
 
     return buffer;
 }

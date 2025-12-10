@@ -51,10 +51,9 @@ void EXTI0_IRQHandler(void)
             Motor_Run(2000);
             last_press = now;
 
-            uint32_t ambient = ReadAmbient(); // TODO
-            float distance = ReadDistance();  // TODO
+            uint32_t ambient = ReadAmbient();
 
-            char *msg = Protocol_BuildTriggerMessage(++seq, ambient, distance);
+            char *msg = Protocol_BuildTriggerMessage(++seq, ambient);
             USART1_SendString(msg);
         }
 
