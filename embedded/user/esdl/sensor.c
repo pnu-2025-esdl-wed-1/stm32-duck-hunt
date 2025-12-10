@@ -3,6 +3,7 @@
 #include "stm32f10x_dma.h"
 #include "stm32f10x_tim.h"
 #include "stm32f10x_rcc.h"
+#include "stm32f10x_gpio.h"
 #include "sensor.h"
 
 volatile uint16_t adc_buf[ADC_BUF_LEN];
