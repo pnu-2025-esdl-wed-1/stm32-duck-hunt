@@ -18,7 +18,7 @@ void Init(void)
     Sensor_ADC_Init();
     Motor_Init();
     Trigger_Init();
-    Trigger_Init();
+    USART1_Init();
 }
 
 int main(void)
@@ -28,7 +28,7 @@ int main(void)
     while (1)
     {
         char chr[1024];
-        sprintf(chr,"%d", _millis);
+        sprintf(chr, "%d", _millis);
         USART1_SendString(chr);
     }
 }
