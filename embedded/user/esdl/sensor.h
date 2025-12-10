@@ -1,5 +1,5 @@
-#ifndef __ADC_SENSOR_H__
-#define __ADC_SENSOR_H__
+#ifndef ESDL_SENSOR_H
+#define ESDL_SENSOR_H
 
 #include <stdint.h>
 

@@ -1,5 +1,5 @@
-#ifndef PROTOCOL_H
-#define PROTOCOL_H
+#ifndef ESDL_PROTOCOL_H
+#define ESDL_PROTOCOL_H
 
 #include <stdint.h>
 

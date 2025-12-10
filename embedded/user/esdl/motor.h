@@ -1,5 +1,5 @@
-#ifndef MOTOR_H
-#define MOTOR_H
+#ifndef ESDL_MOTOR_H
+#define ESDL_MOTOR_H
 
 #include <stdint.h>
 
