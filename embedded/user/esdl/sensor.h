@@ -14,4 +14,5 @@ uint16_t ADC_GetWriteIndex(void);
 
 extern volatile uint16_t adc_buf[ADC_BUF_LEN];
 
+uint16_t ReadPeak(uint16_t start_idx, uint16_t len);
 #endif
