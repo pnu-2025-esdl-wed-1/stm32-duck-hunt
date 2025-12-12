@@ -1,3 +1,5 @@
-# 게임
+# Game
 
-*추가 예정*
+A sensor-based retro game(Duck Hunt)
+
+Made with Unity
