@@ -1,5 +1,5 @@
 # Game
 
-A sensor-based retro game(Duck Hunt)
+Sensor-based retro game(Duck Hunt)
 
 Made with Unity
