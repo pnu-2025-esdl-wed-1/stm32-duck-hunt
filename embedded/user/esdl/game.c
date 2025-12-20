@@ -53,16 +53,19 @@ void Game_Loop(void) {
     // 여기서 아무리 기다려도 데이터를 받을 수 없음.
     if (!isGameInitialized) {
         USART_ITConfig(USART1, USART_IT_RXNE, DISABLE);
+        USART_ITConfig(USART2, USART_IT_RXNE, DISABLE); // 안전하게 둘 다 끔
         isGameInitialized = 1;
     }
 
-    // 2. UART 폴링 처리 (인터럽트가 꺼졌으므로 직접 레지스터를 확인해야 함)
+    // ============================================================
+    // 2-1. PC(USART1) 데이터 처리 -> 앱으로 전달 & 게임 로직
+    // ============================================================
     if (USART_GetFlagStatus(USART1, USART_FLAG_RXNE) != RESET) {
         // 데이터 읽기
         uint8_t ch = (uint8_t)USART_ReceiveData(USART1);
 
         // [기능 복구] 인터럽트 핸들러가 하던 일(Bridge & Echo)을 여기서 대신 수행
-        // 1) Bluetooth(USART2)로 포워딩
+        // 1) Bluetooth(USART2)로 포워딩 (앱 화면 갱신용)
         while (USART_GetFlagStatus(USART2, USART_FLAG_TXE) == RESET);
         USART_SendData(USART2, ch);
 
@@ -83,7 +86,21 @@ void Game_Loop(void) {
         }
     }
 
-    // 3. 게임 상태 머신 처리
+    // ============================================================
+    // 2-2. 앱(USART2) 데이터 처리 -> PC로 전달 (START 버튼용)
+    // ============================================================
+    if (USART_GetFlagStatus(USART2, USART_FLAG_RXNE) != RESET) {
+        // 1. 블루투스(App)에서 날아온 데이터 읽기
+        uint8_t ch2 = (uint8_t)USART_ReceiveData(USART2);
+
+        // 2. PC(Unity)로 그대로 토스해주기
+        while (USART_GetFlagStatus(USART1, USART_FLAG_TXE) == RESET);
+        USART_SendData(USART1, ch2);
+    }
+
+    // ============================================================
+    // 3. 게임 상태 머신 처리 (플래시 감지)
+    // ============================================================
     switch (currentState) {
     case STATE_IDLE:
         break;
