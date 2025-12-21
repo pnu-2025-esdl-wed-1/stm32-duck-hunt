@@ -10,6 +10,6 @@ typedef enum
 
 extern volatile uint32_t seq;
 
-char *Protocol_BuildTriggerMessage(uint32_t seq, uint32_t ambient, uint32_t peak);
+char *Protocol_BuildTriggerMessage(uint32_t seq, uint32_t ambient);
 
 #endif
