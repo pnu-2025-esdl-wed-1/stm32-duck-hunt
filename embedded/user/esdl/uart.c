@@ -98,7 +98,7 @@ void NVIC_Configure(void)
     NVIC_Init(&NVIC_InitStructure);
 }
 
-void USART1_SendString(const char* s)
+void USART1_SendString(const char *s)
 {
     while (*s)
     {
@@ -109,7 +109,7 @@ void USART1_SendString(const char* s)
 }
 
 /* 작은 헬퍼: TXE만 확인하고 보냄(빠른 브릿지용) */
-static inline void USART_SendByte_NoWaitTC(USART_TypeDef* USARTx, uint16_t data)
+static inline void USART_SendByte_NoWaitTC(USART_TypeDef *USARTx, uint16_t data)
 {
     /* 데이터 레지스터가 비었을 때만 쓰기 → 오버런 방지
        (짧게 대기하지만 TC는 기다리지 않음) */
@@ -134,7 +134,10 @@ void USART2_IRQHandler(void)
     if (USART_GetITStatus(USART2, USART_IT_RXNE) != RESET)
     {
         uint8_t byte = (uint8_t)USART_ReceiveData(USART2);
-        USART_SendByte_NoWaitTC(USART1, byte); // PC → Bluetooth 포워딩
+        USART_SendByte_NoWaitTC(USART1, byte); // Bluetooth -> PC 포워딩
+
+        // TODO Start, Reset 기능 구현
+
         // USART_ReceiveData(USART2); // 읽어서 플래그만 클리어
     }
 }
