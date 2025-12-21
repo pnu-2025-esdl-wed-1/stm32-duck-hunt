@@ -6,6 +6,7 @@
 #include "misc.h"
 #include "protocol.h"
 #include "uart.h"
+#include "game.h" //추가
 
 extern volatile uint32_t seq;
 
@@ -52,8 +53,9 @@ void EXTI0_IRQHandler(void)
             last_press = now;
 
             uint32_t ambient = ReadAmbient();
+            uint32_t peak = Game_GetRecentPeak(); //수정
 
-            char *msg = Protocol_BuildTriggerMessage(++seq, ambient);
+            char *msg = Protocol_BuildTriggerMessage(++seq, ambient, peak);
             USART1_SendString(msg);
         }
 
