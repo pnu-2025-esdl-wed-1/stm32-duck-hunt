@@ -7,6 +7,7 @@
 #include "protocol.h"
 #include "uart.h"
 #include "game.h" //추가
+#include "sensor.h"
 
 extern volatile uint32_t seq;
 
