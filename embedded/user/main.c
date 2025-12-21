@@ -22,6 +22,8 @@ void Init(void)
     NVIC_Configure();
     USART1_Init();
     USART2_init();
+
+
 }
 
 int main(void)
@@ -30,6 +32,6 @@ int main(void)
 
     while (1)
     {
-        Game_Loop();      //추가
+    Game_Loop();  //추가
     }
 }
