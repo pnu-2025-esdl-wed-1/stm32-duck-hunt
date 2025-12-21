@@ -54,10 +54,10 @@ void EXTI0_IRQHandler(void)
             last_press = now;
 
             uint32_t ambient = ReadAmbient();
-            uint32_t peak = Game_GetRecentPeak(); //수정
 
-            char *msg = Protocol_BuildTriggerMessage(++seq, ambient, peak);
+            char *msg = Protocol_BuildTriggerMessage(++seq, ambient);
             USART1_SendString(msg);
+            Game_StartCapture();
         }
 
         EXTI_ClearITPendingBit(EXTI_Line0);
