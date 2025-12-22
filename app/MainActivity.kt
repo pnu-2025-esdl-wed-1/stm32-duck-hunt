@@ -38,6 +38,7 @@ import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -225,7 +226,7 @@ fun GameScreen(
             textAlign = TextAlign.Center
         )
         Text(
-            text = "ARCADE EDITION // v1.2",
+            text = "ARCADE EDITION",
             style = MaterialTheme.typography.labelMedium,
             color = NeonCyan.copy(alpha = 0.7f),
             letterSpacing = 6.sp,
@@ -275,8 +276,18 @@ fun GameScreen(
         Spacer(modifier = Modifier.height(24.dp))
 
         // --- Main Game Monitor ---
-        Box(modifier = Modifier.weight(1f)) {
-             GameDashboard(gameStatus, onSendMessage)
+        // --- Main Game Monitor ---
+        Box(modifier = Modifier.weight(1f), contentAlignment = Alignment.Center) {
+             if (isConnected) {
+                 GameDashboard(gameStatus, onSendMessage)
+             } else {
+                 Text(
+                     text = "LINK REQUIRED", 
+                     color = Color.DarkGray, 
+                     style = MaterialTheme.typography.displayMedium,
+                     fontWeight = FontWeight.Bold 
+                 )
+             }
         }
 
         // --- Footer / Logs ---
@@ -332,34 +343,39 @@ fun GameScreen(
 fun GameDashboard(status: GameStatus?, onSendMessage: (String) -> Unit) {
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.SpaceBetween,
-        modifier = Modifier.fillMaxSize() 
+        verticalArrangement = Arrangement.Center, // Center everything vertically
+        modifier = Modifier.fillMaxSize().padding(16.dp)
     ) {
         
         // --- SCOREBOARD ---
-        Box(contentAlignment = Alignment.Center) {
-             // Outer Glow
-             Canvas(modifier = Modifier.size(250.dp)) {
-                 drawCircle(
-                     brush = Brush.radialGradient(
-                         colors = listOf(NeonMagenta.copy(alpha=0.2f), Color.Transparent)
-                     )
-                 )
-             }
+        Box(
+            contentAlignment = Alignment.Center,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 20.dp)
+                .border(3.dp, NeonMagenta, RoundedCornerShape(24.dp))
+                .background(NeonMagenta.copy(alpha = 0.05f), RoundedCornerShape(24.dp))
+                .padding(vertical = 80.dp, horizontal = 16.dp)
+                // Add outer shadow/glow via graphicsLayer if needed, but simple border is requested "neon rectangular border"
+        ) {
+             // Optional: Inner glow or fancier border effect could be added here
              
              Column(horizontalAlignment = Alignment.CenterHorizontally) {
                  Text(
-                     text = "SCORE",
+                     text = "CURRENT SCORE",
                      style = MaterialTheme.typography.labelMedium,
-                     color = NeonMagenta
+                     color = NeonMagenta,
+                     letterSpacing = 4.sp,
+                     fontSize = 18.sp
                  )
+                 Spacer(modifier = Modifier.height(8.dp))
                  Text(
                      text = String.format("%05d", status?.score ?: 0),
                      style = MaterialTheme.typography.displayLarge.copy(
-                         fontSize = 72.sp,
+                         fontSize = 96.sp, // Even larger
                          shadow = androidx.compose.ui.graphics.Shadow(
                              color = NeonMagenta,
-                             blurRadius = 20f
+                             blurRadius = 30f
                          )
                      ),
                      color = Color.White
@@ -367,73 +383,158 @@ fun GameDashboard(status: GameStatus?, onSendMessage: (String) -> Unit) {
              }
         }
         
-        // --- TIME BAR ---
-        val maxTime = 60f // Assuming 60s max for visual proportion
-        val currentTime = (status?.time ?: 0).toFloat()
-        val timeProgress = (currentTime / maxTime).coerceIn(0f, 1f)
-        val isLowTime = currentTime <= 5 && currentTime > 0
+        Spacer(modifier = Modifier.height(48.dp))
+
+        // --- AMMO DISPLAY ---
+        val maxAmmo = 3
+        val currentAmmo = status?.bullets ?: 3
         
-        Column(
-            modifier = Modifier.fillMaxWidth().padding(horizontal = 24.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
+        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+            Text(
+                "AMMUNITION", 
+                color = NeonAmber, 
+                style = MaterialTheme.typography.titleMedium,
+                letterSpacing = 4.sp
+            )
+            Spacer(modifier = Modifier.height(24.dp))
+            
             Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.Bottom
+                horizontalArrangement = Arrangement.spacedBy(24.dp),
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                 Text("TIME REMAINING", color = NeonCyan, fontSize = 12.sp)
-                 Text(
-                     "${status?.time ?: 0}s", 
-                     color = if(isLowTime) Color.Red else NeonCyan, 
-                     fontSize = 24.sp,
-                     fontWeight = FontWeight.Bold
-                 )
+                for (i in 1..maxAmmo) {
+                    val isActive = i <= currentAmmo
+                    
+                    // Rifle Cartridge Shape (Refined: Less "Wing-like")
+                    val bulletShape = androidx.compose.foundation.shape.GenericShape { size, _ ->
+                        val w = size.width
+                        val h = size.height
+                        
+                        // Start at Top Tip
+                        moveTo(w / 2f, 0f)
+                        
+                        // Right Side
+                        // Ogive (Bullet curve - wider neck)
+                        cubicTo(w * 0.6f, 0f, w * 0.85f, h * 0.15f, w * 0.85f, h * 0.3f) 
+                        
+                        // Neck (Short vertical)
+                        lineTo(w * 0.85f, h * 0.35f)
+                        
+                        // Shoulder (Subtler taper)
+                        lineTo(w, h * 0.45f)
+                        
+                        // Body
+                        lineTo(w, h * 0.9f)
+                        
+                        // Extractor Groove
+                        lineTo(w * 0.9f, h * 0.9f)
+                        lineTo(w * 0.9f, h * 0.94f)
+                        
+                        // Rim Flange
+                        lineTo(w, h * 0.94f)
+                        lineTo(w, h)
+                        
+                        // Top of Bottom (Base Line)
+                        lineTo(0f, h)
+                        
+                        // Left Side (Mirror)
+                        // Rim
+                        lineTo(0f, h * 0.94f)
+                        lineTo(w * 0.1f, h * 0.94f)
+                        
+                        // Groove
+                        lineTo(w * 0.1f, h * 0.9f)
+                        lineTo(0f, h * 0.9f)
+                        
+                        // Body
+                        lineTo(0f, h * 0.45f)
+                        
+                        // Shoulder
+                        lineTo(w * 0.15f, h * 0.35f)
+                        
+                        // Neck
+                        lineTo(w * 0.15f, h * 0.3f)
+                        
+                        // Ogive
+                        cubicTo(w * 0.15f, h * 0.15f, w * 0.4f, 0f, w / 2f, 0f)
+                        
+                        close()
+                    }
+
+                    // Bullet Shape Box
+                    Box(
+                        modifier = Modifier
+                            .width(60.dp) // Reset relative width to be slimmer
+                            .height(160.dp) 
+                            .graphicsLayer {
+                                shadowElevation = if(isActive) 20f else 0f
+                                shape = bulletShape
+                                clip = true
+                            }
+                            .background(
+                                brush = if(isActive) Brush.horizontalGradient(
+                                    colors = listOf(
+                                        Color(0xFFB8860B), 
+                                        Color(0xFFFFD700), 
+                                        Color(0xFFFFFACD), 
+                                        Color(0xFFB8860B)
+                                    )
+                                ) else Brush.verticalGradient(
+                                    colors = listOf(Color.DarkGray.copy(alpha=0.3f), Color.Black.copy(alpha=0.5f))
+                                ),
+                                shape = bulletShape
+                            )
+                            .border(
+                                width = if(isActive) 2.dp else 1.dp,
+                                color = if(isActive) Color(0xFFFFD700).copy(alpha=0.8f) else Color.Gray.copy(alpha=0.3f),
+                                shape = bulletShape
+                            )
+                    ) {
+                        // Glossy reflection on Casing and Bullet
+                        if (isActive) {
+                             Canvas(modifier = Modifier.fillMaxSize()) {
+                                 // Bullet Specular (Top)
+                                 drawRoundRect(
+                                     color = Color.White.copy(alpha = 0.6f),
+                                     topLeft = Offset(size.width * 0.35f, size.height * 0.1f),
+                                     size = androidx.compose.ui.geometry.Size(size.width * 0.15f, size.height * 0.15f),
+                                     cornerRadius = androidx.compose.ui.geometry.CornerRadius(10f)
+                                 )
+                                 // Casing Specular (Body)
+                                 drawRoundRect(
+                                     color = Color.White.copy(alpha = 0.4f),
+                                     topLeft = Offset(size.width * 0.2f, size.height * 0.5f),
+                                     size = androidx.compose.ui.geometry.Size(size.width * 0.1f, size.height * 0.35f),
+                                     cornerRadius = androidx.compose.ui.geometry.CornerRadius(5f)
+                                 )
+                             }
+                        }
+                    }
+                }
             }
-            Spacer(modifier = Modifier.height(8.dp))
-            // Custom Progress Bar
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(20.dp)
-                    .background(Color(0xFF111122), RoundedCornerShape(4.dp))
-                    .border(1.dp, NeonCyan.copy(alpha = 0.3f), RoundedCornerShape(4.dp))
-            ) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth(timeProgress)
-                        .fillMaxHeight()
-                        .background(
-                            brush = Brush.horizontalGradient(
-                                colors = if(isLowTime) listOf(Color.Red, Color(0xFFFF5555)) 
-                                         else listOf(NeonCyan, Color(0xFF55FFFF))
-                            ),
-                            shape = RoundedCornerShape(4.dp)
-                        )
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            if (currentAmmo == 0) {
+                Text(
+                    "RELOAD REQUIRED",
+                    color = Color.Red,
+                    style = MaterialTheme.typography.headlineSmall,
+                    fontWeight = FontWeight.Bold
+                )
+            } else {
+                Text(
+                    "$currentAmmo / $maxAmmo",
+                    color = NeonAmber.copy(alpha=0.5f),
+                    style = MaterialTheme.typography.titleMedium
                 )
             }
         }
-
-        Spacer(modifier = Modifier.height(24.dp))
-
-        // --- CONTROLS ---
-        Row(
-            modifier = Modifier.fillMaxWidth().padding(bottom = 20.dp),
-            horizontalArrangement = Arrangement.SpaceEvenly
-        ) {
-            ArcadeButton(
-                text = "START",
-                color = NeonCyan,
-                onClick = { onSendMessage("CMD,START\n") }
-            )
-            ArcadeButton(
-                text = "RESET",
-                color = NeonAmber,
-                onClick = { onSendMessage("CMD,RESET\n") }
-            )
-        }
     }
 }
+
+
+
 
 @Composable
 fun CyberpunkPanel(
@@ -481,24 +582,20 @@ fun CyberpunkPanel(
 fun ArcadeButton(
     text: String,
     color: Color,
-    onClick: () -> Unit
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier.size(110.dp)
 ) {
     var isPressed by remember { mutableStateOf(false) }
     
     Box(
-        modifier = Modifier
-            .size(110.dp)
+        modifier = modifier
             .clickable(
                 interactionSource = remember { MutableInteractionSource() },
                 indication = null
             ) { 
                  isPressed = true
                  onClick()
-                 // Reset pressed state after a quick delay for visual feedback handling is complex in compose without coroutine but visual tap is better handled by interaction source usually. 
-                 // For now, let's just rely on the ripple or scale. 
-                 // Better implementation:
             }
-            // Simple press effect manually
             .graphicsLayer {
                 val scale = if (isPressed) 0.95f else 1f
                 scaleX = scale
@@ -514,31 +611,34 @@ fun ArcadeButton(
          }
     
         Canvas(modifier = Modifier.fillMaxSize()) {
-            val center = center
-            val radius = size.minDimension / 2
+            val cornerRadius = androidx.compose.ui.geometry.CornerRadius(size.minDimension / 2)
+            val strokeWidth = 4.dp.toPx()
+            val padding = 8.dp.toPx()
             
             // Outer Ring
-            drawCircle(
+            drawRoundRect(
                 color = color.copy(alpha = 0.3f),
-                radius = radius,
-                style = androidx.compose.ui.graphics.drawscope.Stroke(width = 4.dp.toPx())
+                cornerRadius = cornerRadius,
+                style = Stroke(width = strokeWidth)
             )
             
             // Inner Fill (Glassy)
-            drawCircle(
-                brush = Brush.radialGradient(
-                    colors = listOf(color.copy(alpha = 0.1f), color.copy(alpha = 0.6f)),
-                    center = center,
-                    radius = radius
+            drawRoundRect(
+                brush = Brush.horizontalGradient(
+                    colors = listOf(color.copy(alpha = 0.1f), color.copy(alpha = 0.6f))
                 ),
-                radius = radius - 8.dp.toPx()
+                cornerRadius = androidx.compose.ui.geometry.CornerRadius((size.minDimension - padding*2) / 2),
+                topLeft = Offset(padding, padding),
+                size = androidx.compose.ui.geometry.Size(size.width - padding*2, size.height - padding*2)
             )
             
-            // Border
-            drawCircle(
+            // Inner Border
+            drawRoundRect(
                 color = color,
-                radius = radius - 8.dp.toPx(),
-                style = androidx.compose.ui.graphics.drawscope.Stroke(width = 2.dp.toPx())
+                cornerRadius = androidx.compose.ui.geometry.CornerRadius((size.minDimension - padding*2) / 2),
+                topLeft = Offset(padding, padding),
+                size = androidx.compose.ui.geometry.Size(size.width - padding*2, size.height - padding*2),
+                style = Stroke(width = 2.dp.toPx())
             )
         }
         
@@ -645,13 +745,13 @@ fun GameScreenPreview() {
         Box(modifier = Modifier.background(Color.Black)) {
             GameScreen(
                 connectionState = ConnectionState.Connected("STM32-Game"),
-                gameStatus = GameStatus(score = 8500, time = 30),
+                gameStatus = GameStatus(score = 8500, bullets = 2),
                 onConnect = {},
                 onDisconnect = {},
                 onSendMessage = {},
                 onCheckPermissions = {},
                 bluetoothAdapter = null,
-                messageLogs = listOf("[RX] STATUS,score=100,time=5")
+                messageLogs = listOf("어쩌구 저쩌구~")
             )
         }
     }
