@@ -1,31 +1,21 @@
 using System;
+using System.Collections;
 using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.IO.Ports;
 using System.Threading;
 
 using UnityEngine;
+using TMPro;
 
-
-/// <summary>
-/// 시리얼 통신을 처리하는 매니저
-/// Windows(AMD64)에서만 동작을 보장
-/// </summary>
 public class SerialManagerWin64: MonoBehaviour
 {
-    // 싱글톤
     public static SerialManagerWin64 Instance { get; private set; }
 
-
-    public GameObject currentTarget;
-
-
     private SerialPort _sp;
-
     private Thread _readThread;
     private bool _running = false;
-
     private ConcurrentQueue<string> _msgQueue = new ConcurrentQueue<string>();
-
 
     void Awake()
     {
@@ -40,18 +30,25 @@ public class SerialManagerWin64: MonoBehaviour
         DontDestroyOnLoad(gameObject);
     }
 
-    void OnApplicationQuit()
+    void Update()
     {
-        CloseSerial();
+        while (_msgQueue.TryDequeue(out string msg))
+        {
+            ProcessMessage(msg);
+        }
     }
 
+    void OnApplicationQuit()
+    {
+        closeSerial();
+    }
 
-    public void OpenSerial()
+    public void openSerial()
     {
         try
         {
-            string port = SerialConfig.Instance.port;
-            int baudRate = SerialConfig.Instance.baudRate;
+            string port = GameConfig.Instance.port;
+            int baudRate = GameConfig.Instance.baudRate;
 
             _sp = new SerialPort(port, baudRate);
             _sp.NewLine = "\n";
@@ -60,20 +57,26 @@ public class SerialManagerWin64: MonoBehaviour
             _sp.Open();
 
             _running = true;
-            _readThread = new Thread(ReadLoop);
+            _readThread = new Thread(readThread);
 
             _readThread.Start();
 
-            Debug.Log("[Serial] Opened " + port);
+            StartCoroutine(writeRoutine());
+
+            Debug.Log("[SerialManager] Opened " + port);
         }
         catch (Exception e)
         {
-            Debug.LogError("[Serial] Failed to open: " + e);
+            Debug.LogWarning("[SerialManager] Failed to open: " + e);
         }
     }
 
+    public bool isSerialOpened()
+    {
+        return _sp != null && _sp.IsOpen;
+    }
 
-    private void CloseSerial()
+    private void closeSerial()
     {
         try
         {
@@ -91,7 +94,7 @@ public class SerialManagerWin64: MonoBehaviour
         }
     }
 
-    private void ReadLoop()
+    private void readThread()
     {
         while (_running)
         {
@@ -109,28 +112,64 @@ public class SerialManagerWin64: MonoBehaviour
             }
             catch (Exception e)
             {
-                Debug.LogError("[Serial] Read Error: " + e);
+                Debug.LogError("[SerialManager] Read Error: " + e);
                 _running = false;
             }
         }
     }
 
-    void Update()
+    private IEnumerator writeRoutine()
     {
-        while (_msgQueue.TryDequeue(out string msg))
+        while (true)
         {
-            ProcessMessage(msg);
+            _sp.WriteLine("TYPE=200;SCORE=" + GameManager.Instance.getScore() + ";SHOTS=" + GameManager.Instance.getShots());
+
+            yield return new WaitForSeconds(0.5f);
         }
     }
 
     private void ProcessMessage(string msg)
     {
-        if (msg.StartsWith("TYPE"))
-        {
-            Debug.Log("[Serial] TRIG received: " + msg);
-            _sp.WriteLine("[Serial] TRIG activated: " + msg);
+        Dictionary<string, int> parsedMsg = parseMsg(msg);
 
-            HitTestController.Instance.HitTest(currentTarget);
+        switch (parsedMsg["TYPE"])
+        {
+            case 100: // TYPE_TRIGGER
+                SerialIPC.Instance.setInitVal(parsedMsg["AMB"]);
+
+                break;
+            case 102: // TYPE_PEAK
+                SerialIPC.Instance.setTestVal(parsedMsg["AMB"]);
+
+                break;
+            default:
+                Debug.Log("[SerialManager] Unknown Message Recieved: " + msg);
+
+                break;
         }
+    }
+
+    private Dictionary<string, int> parseMsg(string msg)
+    {
+        Dictionary<string, int> parsedMsg = new Dictionary<string, int>();
+
+        string[] pairs = msg.Split(';');
+
+        foreach (string pair in pairs)
+        {
+            string[] k_v = pair.Split('=');
+            if (k_v.Length != 2)
+                continue;
+
+            string key = k_v[0].Trim();
+            string valueStr = k_v[1].Trim();
+
+            if (int.TryParse(valueStr, out int value))
+            {
+                parsedMsg[key] = value;
+            }
+        }
+
+        return parsedMsg;
     }
 }
