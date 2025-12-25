@@ -8,11 +8,11 @@ data class GameStatus(
 object MessageParser {
     /**
      * Parses a STATUS message from the STM32.
-     * Expected format: "STATUS,score=20,bullets=5"
+     * Expected format: "TYPE=200;SCORE=...;SHOTS=..." (SHOTS maps to bullets)
      * Returns null if format is invalid or not a STATUS message.
      */
     fun parseStatus(message: String): GameStatus? {
-        // New Protocol: TYPE=200;SCORE=100;BULLETS=3
+        // New Protocol: TYPE=200;SCORE=100;SHOTS=3
         if (message.startsWith("TYPE=200")) {
             try {
                 val parts = message.split(";")
@@ -24,10 +24,13 @@ object MessageParser {
                         part.startsWith("SCORE=") -> {
                             score = part.substringAfter("SCORE=").toIntOrNull() ?: 0
                         }
+                        part.startsWith("SHOTS=") -> {
+                            bullets = part.substringAfter("SHOTS=").toIntOrNull() ?: 3
+                        }
                         part.startsWith("BULLETS=") -> {
                             bullets = part.substringAfter("BULLETS=").toIntOrNull() ?: 3
                         }
-                    }
+                    } 
                 }
                 return GameStatus(score, bullets)
             } catch (e: Exception) {
@@ -47,6 +50,8 @@ object MessageParser {
                         score = part.substringAfter("score=").toInt()
                     } else if (part.startsWith("bullets=")) {
                         bullets = part.substringAfter("bullets=").toInt()
+                    } else if (part.startsWith("shots=")) {
+                        bullets = part.substringAfter("shots=").toInt()
                     }
                 }
                 return GameStatus(score, bullets)

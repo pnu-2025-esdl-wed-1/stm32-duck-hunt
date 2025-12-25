@@ -214,7 +214,7 @@ fun GameScreen(
         // --- Header ---
         Spacer(modifier = Modifier.height(32.dp))
         Text(
-            text = "RETRO DUCK HUNT",
+            text = "STM32 DUCK HUNT",
             style = MaterialTheme.typography.displayMedium.copy(
                 shadow = androidx.compose.ui.graphics.Shadow(
                     color = NeonMagenta,
@@ -226,7 +226,7 @@ fun GameScreen(
             textAlign = TextAlign.Center
         )
         Text(
-            text = "ARCADE EDITION",
+            text = "PNU CSE 2025 ESDL TEAM PROJECT",
             style = MaterialTheme.typography.labelMedium,
             color = NeonCyan.copy(alpha = 0.7f),
             letterSpacing = 6.sp,
@@ -397,7 +397,7 @@ fun GameDashboard(status: GameStatus?, onSendMessage: (String) -> Unit) {
                 letterSpacing = 4.sp
             )
             Spacer(modifier = Modifier.height(24.dp))
-            
+             
             Row(
                 horizontalArrangement = Arrangement.spacedBy(24.dp),
                 verticalAlignment = Alignment.CenterVertically
@@ -530,6 +530,8 @@ fun GameDashboard(status: GameStatus?, onSendMessage: (String) -> Unit) {
                 )
             }
         }
+
+
     }
 }
 
@@ -745,7 +747,7 @@ fun GameScreenPreview() {
         Box(modifier = Modifier.background(Color.Black)) {
             GameScreen(
                 connectionState = ConnectionState.Connected("STM32-Game"),
-                gameStatus = GameStatus(score = 8500, bullets = 2),
+                gameStatus = GameStatus(score = 1203, bullets = 2),
                 onConnect = {},
                 onDisconnect = {},
                 onSendMessage = {},
